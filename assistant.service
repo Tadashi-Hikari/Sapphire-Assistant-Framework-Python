@@ -1,9 +1,0 @@
-[Unit]
-Description=My personal assistant daemon
-
-[Service]
-ExecStart=/usr/bin/python3 /home/chris/Lab/dex-framework/core.py
-Restart=on-failure
-
-[Install]
-WantedBy=default.target

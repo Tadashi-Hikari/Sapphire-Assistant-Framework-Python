@@ -8,4 +8,4 @@ This project contains a customizable personal assistant program, mostly written 
 
 Primary features of this are that it is designed to work offline without registration with any services, can be networked with other instances of the assistant, designed for each mobile, desktop, and server useage, and to be customized on device.
 
-Please read the project Wiki for more information for how it works
+Please read the project Wiki for more information for how it works. It can be found at https://gitlab.com/Hikari_Tadashi/assistant/-/wikis/home

@@ -8,7 +8,7 @@ from selflib import *
 
 database = os.getenv("ASST_HOME") # These need to always be held, per component
 if database == None:
-    database = "/home/chris/Lab/dex-framework/"
+    database = "~/.local/assistant/"
 database+="core.db" # this should probably be standardized
 
 table = "main" # same

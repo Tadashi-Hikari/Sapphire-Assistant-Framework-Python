@@ -4,18 +4,18 @@ from selflib import *
 
 # These values are set in load_config, from the values in selflib.py. just here for global reference. Maybe move to main?
 COMMAND = "python3"
-home = "/home/chris/Lab/dex-framework/"
-stt = home+"sphinx-server.py"
-PARSER = home+"padatious-parser.py" # this conflicts w/ arg parser. be careful changing it
+base = "/home/chris/Lab/dex-framework/" # Well. This needs to be scrubbed... what should it be?
+stt = base+"sphinx-server.py"
+PARSER = base+"padatious-parser.py" # this conflicts w/ arg parser. be careful changing it
 version = "0.0.1"
-database = home+"sqldatabase.py"
-formatter = home+"command-formatter.py"
-gui = home+"gui"
-CONFIG = "/home/chris/.config/assistant/core.conf" # <- The config directory should probably be broadcast
+database = base+"sqldatabase.py"
+formatter = base+"command-formatter.py"
+gui = base+"gui"
+CONFIG = "~/.config/assistant/core.conf" # <- The config directory should probably be broadcast
 LOG_DIR = "/var/log/assistant/"
 
 # this is the pipeline the message goes through. to hack this, just inject a small method that checks the current spot in the path and injects your custom command
-message_path = ["parser","command-formatter","command"] # huh, I thought it was longer
+message_path = ["parser","command-formatter","command"] # you can hack in extra modules here if you'd like
 
 ''' To have assistant handle non text data (such as audio or pictures), just stdout pipe the binary form into message, and give it a custom component tag to run'''
 
@@ -132,7 +132,7 @@ def load_config(): # using configparser
         notify("There doesn't seem to be a config file...")
 
     os.environ["ASST_DATABASE"] = database # set this externally for other programs to see
-    os.environ["ASST_HOME"] = home
+    os.environ["ASST_BASE"] = base
     os.environ["ASST_COMMAND"] = COMMAND
     os.environ["ASST_CONFIG"] = CONFIG
     notify("config loaded")
@@ -173,7 +173,7 @@ def edit_utterances(): # load a csv file in libreoffice calc to edit. probably w
     command = [COMMAND,database,"-wc","-t","utterance"]
     filename = subprocess.run(command, stdout=subprocess.PIPE)
     filename = filename.stdout.decode('utf-8')
-    os.system("libreoffice --calc -o %s"%(home+filename)) # I need this to trigger an update on next load
+    os.system("libreoffice --calc -o %s"%(base+filename)) # I need this to trigger an update on next load
     
 def shell_out(filename): # Drop to the editor, for editing core scripts
     os.system("emacs %s"%(filename))

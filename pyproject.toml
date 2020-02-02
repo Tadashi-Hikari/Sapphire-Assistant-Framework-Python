@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "assistant"
+version = "0.0.1"
+description = "A framework for creating, using, refining, and customizing a virtual personal assistant to meet the users needs"
+authors = ["Christopher Carroll <ccarroll4812@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+padatious = "^0.4.7"
+pyaudio = "^0.2.11"
+pocketsphinx = "^0.1.15"
+notify2 = "^0.3.1"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

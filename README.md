@@ -19,11 +19,6 @@ cd assistant
 poetry install
 ## replace service config file vars with yours and place it in your user services die
 sed "s,{ASST_BASE_PLACEHOLDER},$(pwd)/assistant/g" assistant/assistant.service >> ${HOME}/.config/systemd/user/assistant.service
-## replace env vars with yours and create a file in your home
-sed "s,{ASST_BASE_PLACEHOLDER},$(pwd)/assistant/g" assistant/.assistant_profile >> ${HOME}/.assistant_profile
-## add env vars to your enviroment this could be done manualy as well
-echo '## enviroment varables for assistant' >> ${HOME}/.profile
-echo "source ${HOME}/.assistant_profile" >> ${HOME}/.profile
 ## setup service to be ran with systemd as a user service
 systemctl --user enable assistant
 ## Start the service

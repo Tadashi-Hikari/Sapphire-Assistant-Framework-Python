@@ -2,7 +2,8 @@
 Description=My personal assistant daemon
 
 [Service]
-ExecStart=/usr/bin/python3 /home/chris/Lab/dex-framework/core.py
+WorkingDirectory={ASST_BASE_PLACEHOLDER}
+ExecStart=poetry run python3 {ASST_BASE_PLACEHOLDER}/core.py
 Restart=on-failure
 
 [Install]

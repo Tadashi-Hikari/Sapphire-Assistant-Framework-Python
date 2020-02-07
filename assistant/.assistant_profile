@@ -1,0 +1,13 @@
+
+
+
+
+export ASST_BASE="/home/andruid/assistant/assistant"
+export STT_ENGINE="${ASST_BASE}/sphinx-server.py"
+export ASST_PARSER="${ASST_BASE}/padatious-parser.py"
+export ASST_VER="0.0.1"
+export ASST_DATABASE="${ASST_BASE}/sqldatabase.py"
+export ASST_GUI="${ASST_BASE}/gui"
+export ASST_PARSER_CONFIG="${HOME}/.config/assistant/padatious-parser.conf"
+export ASST_CONFIG="${HOME}/.config/assistant/core.conf" # You could not need this, if everything is env vars
+export ASST_LOG_DIR="/var/log/assistant/"

@@ -8,18 +8,36 @@ This project contains a customizable personal assistant program, mostly written 
 
 Primary features of this are that it is designed to work offline without registration with any services, can be networked with other instances of the assistant, designed for each mobile, desktop, and server useage, and to be customized on device.
 
-Please read the project Wiki for more information for how it works. It can be found at https://gitlab.com/Hikari_Tadashi/assistant/-/wikis/home
+Please read the project [Wiki](https://gitlab.com/Hikari_Tadashi/assistant/-/wikis/home) for more information for how it works.
 
 
-Normal Setup:
-git clone https://gitlab.com/Hikari_Tadashi/assistant.git
-install poetry (I.E. ```pacman -S python-poetry```)
-cd assistant
-## Setup our poetry env
-poetry install
-## replace service config file vars with yours and place it in your user services die
-sed "s,{ASST_BASE_PLACEHOLDER},$(pwd)/assistant/g" assistant/assistant.service >> ${HOME}/.config/systemd/user/assistant.service
-## setup service to be ran with systemd as a user service
-systemctl --user enable assistant
-## Start the service
-systemctl --user start assistant
+## Normal Setup:
+<code>git clone https://gitlab.com/Hikari_Tadashi/assistant.git</code>
+
+### Enter the assistant directory
+
+<code>cd assistant</code>
+
+$## install poetry 
+
+This step varies depending on your package manager. For more information, go to [poetrys website](https://python-poetry.org/docs/#installation)
+
+Example: <code>pacman -S python-poetry</code>
+
+### Setup the poetry environment
+
+<code>poetry install</code>
+
+### Setup the Systemd service
+
+<code>sed "s,{ASST_BASE_PLACEHOLDER},$(pwd)/assistant/g" assistant/assistant.service >> ${HOME}/.config/systemd/user/assistant.service</code>
+
+### Enable the Systemd service
+
+<code>systemctl --user enable assistant</code>
+
+### Start the assistant
+
+<code>systemctl --user start assistant</code>
+
+Once all these steps are complete, the Assistant will run on user login

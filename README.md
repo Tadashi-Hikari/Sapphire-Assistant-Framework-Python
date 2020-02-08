@@ -14,6 +14,10 @@ Please read the project [Wiki](https://gitlab.com/Hikari_Tadashi/assistant/-/wik
 ## Normal Setup:
 Following this setup guide will install the assistant, and create a system service that will start upon user login. To send messages to the assistant, use the udp-client.py with <code>python3 udp-client.py "your message here"</code>. It can also be useful to make an alias for this command, such as <code>alias msg=python3 /your/assistant/directory/udp-client.py</code> and put it in your .profile script
 
+To start the setup, just follow the guide below
+
+### Copy the git repository
+
 <code>git clone https://gitlab.com/Hikari_Tadashi/assistant.git</code>
 
 ### Enter the assistant directory

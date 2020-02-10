@@ -8,8 +8,9 @@ from selflib import *
 
 database = os.getenv("ASST_HOME") # These need to always be held, per component
 if database == None:
-    database = "~/.local/assistant/"
-database+="core.db" # this should probably be standardized
+    notify("make the directory for this. For now, I don't want to pollute the devs computer")
+    #database = "~/.local/assistant/"
+database="core.db" # this should probably be standardized. Append it to the prior directory when change is made
 
 table = "main" # same
 
@@ -134,9 +135,9 @@ def list_table(): # This sends a list of KVP, for deserialize
 
     loud_notify("RECORD LIST", record_list)
     serialized = serialize(record_list)
-    if args.write is False:
+    if args.write is not True:
         print(serialized) # <- this is for use in core.py
-    return serialized # <- this is for internal sqldatabase useage
+    return serialized # <- this is for internal sqldatabase useage (and selflib)
 
 def list_all_tables():
     c.execute("SELECT name FROM sqlite_master WHERE type='table'")
@@ -209,7 +210,7 @@ def check_if_table_exists(tableName):
         print("False")
         return False
     print("True")
-    return True    
+    return True
 
 # --- START OF MAIN PROGRAM LOGIC ---
 if __name__ == '__main__':

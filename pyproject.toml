@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "assistant"
-version = "0.0.1"
+version = "0.1.0"
 description = "A framework for creating, using, refining, and customizing a virtual personal assistant to meet the users needs"
 authors = ["Christopher Carroll <ccarroll4812@gmail.com>"]
 license = "MIT"

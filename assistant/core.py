@@ -3,16 +3,16 @@ from multiprocessing import Process
 from selflib import *
 
 # These values are set in load_config, from the values in selflib.py. just here for global reference. Maybe move to main?
-COMMAND = "python3"
-base = "/home/chris/Lab/dex-framework/" # Well. This needs to be scrubbed... what should it be?
+COMMAND = "python3" # this is just because every skill is python. Ideally, this wont need to preface every command. Maybe just use a shebang?
+base = "./" # Well. This needs to be scrubbed... what should it be?
 stt = base+"sphinx-server.py"
 PARSER = base+"padatious-parser.py" # this conflicts w/ arg parser. be careful changing it
 version = "0.0.1"
 database = base+"sqldatabase.py"
 formatter = base+"command-formatter.py"
 gui = base+"gui"
-CONFIG = "~/.config/assistant/core.conf" # <- The config directory should probably be broadcast
-LOG_DIR = "/var/log/assistant/"
+#CONFIG = "~/.config/assistant/core.conf" # The config directory should probably be broadcast
+#LOG_DIR = "/var/log/assistant/" # this is a goal. Not set up yet
 
 # this is the pipeline the message goes through. to hack this, just inject a small method that checks the current spot in the path and injects your custom command
 message_path = ["parser","command-formatter","command"] # you can hack in extra modules here if you'd like
@@ -62,14 +62,15 @@ def post_office(message): # this is the primary routing service
         # if 'chain' in message: # this is where I add the chain logic
         if message['payload'] == "No matches" and message['from'] == "parser": 
             user_notify("Message: \"%s\" does not match a command"%(message['original']))
-        elif message['from'] == parser: # I don't like how this is all being evaluated here. perhaps post_office() should be moved out to a separte file
-            serial = serialize(message)
+        elif message['from'] == "parser": # I don't like how this is all being evaluated here. perhaps post_office() should be moved out to a separte file
+            serial = serialize(message) # serializes with json
             command = [formatter,"-f",serial,"-v"]
-            data = call_application(command)
-            response = data.decode('utf-8')
+            data = call_application(command) # call application can be found in selflib.py
+            #response = data.decode('utf-8') # I don't think I need this, since it's not over UDP
             print(response)
         else:
-            user_notify("Payload: %s. It appears we have reached the end"%(message["payload"]))
+            # if we somehow got here, without going through the command-formatter. Good for testing if you're working on the formatter
+            user_notify("Payload: %s. It matched a command. It appears we have reached the end"%(message["payload"])) 
             print("It appears we have reached the end")
     else: # This sends the utterance to the parser. What happens after it's parsed? format for cli, and run program.
         notify("Unsure what to do, sending to %s"%(message_path[0])) # send it from the start of the pipeline
@@ -134,7 +135,7 @@ def load_config(): # using configparser
     os.environ["ASST_DATABASE"] = database # set this externally for other programs to see
     os.environ["ASST_BASE"] = base
     os.environ["ASST_COMMAND"] = COMMAND
-    os.environ["ASST_CONFIG"] = CONFIG
+    #os.environ["ASST_CONFIG"] = CONFIG
     notify("config loaded")
 
 def start_ui(): # You should be a separate process, that listens over the network, and interacts with components over its own shell

@@ -3,19 +3,19 @@ from padatious import IntentContainer
 from selflib import *
 
 # Global variables
-container = IntentContainer('intent_cache')
+container = IntentContainer('intent_cache') # this is where the trained NN stuff is saved
 # change stdout since padatious is noisy. This can be changed w/ verbose
 stdout = sys.stdout # keep a local copy
 sys.stdout = None
-CONFIG = "/home/chris/.config/assistant/padatious-parser.conf"
+#CONFIG = 
 command_table = "commands"
 training_utterances_table = "utterances"
 
 ''' I need to have padatious running as a service, due to its need to load intents every time the program is initialized. Likewise, I need to have padatious pull from the database, rather handwriting the add_intent each time. '''
 
-def load_config():
-    config = configparser.ConfigParser()
-    config.read(CONFIG)
+def load_config(): # this is not enabled yet
+    config = configparser.ConfigParser() 
+    config.read(CONFIG) # this needs to be implemented with a try/catch
 
     command_table = "commands"
     trianing_utterances_table = "utterances"
@@ -38,15 +38,15 @@ def parse(utterance):
         # call_application(["command-formatter.py","-f",serial]) # <- This should actually return to core
     else:
         serial = serialize("No matches")
+        notify("Confidence: %d"%(data.conf))
         print(serial) # maybe change this to match a 'no match' command
     # print(data)
-    
+
 def train(): # I need to find a way to supress the output of this..
     command = ["-t", command_table, "-l"] # list all the commands in the database <- this should load from a configurable database...
+    print("calling database")
     data = call_database(command)
-    records = data.decode('utf-8') # it's expecting string data
-    records = records.strip()
-    records = deserialize(records) # records are a list[dict{}] structure. each dict is a record
+    records = deserialize(data) # records are a list[dict{}] structure. each dict is a record
 
     notify(records)
     
@@ -55,13 +55,13 @@ def train(): # I need to find a way to supress the output of this..
     utterances = data.decode('utf-8')
     utterances = utterances.strip()
     utterances = deserialize(utterances)
-    notify(utterances)
+    notify(utterances) 
     
     for record in records: # records is a list, record is a dict. records of commands
-        record["utterances"] = []  # <- why am I clearing this here? utterances can be a list, it doesn't overwrite utterance. If it's not cleared, then it doesn't make a new record, it just keeps referencing the same memory location. it actually doesnt even need to be record. it can be a new dict
+        record["utterances"] = []  # <- why am I clearing this here? If it's not cleared, then it doesn't make a new record, it just keeps referencing the same memory location. 
         # if it's new new, then also load the utterances
         for i,utterance in enumerate(utterances): # for every utterance in the database...
-            if utterance["command"] == record["command"]: # check if the utterance matches a known command. If this crashes, make sure the csv column headers match
+            if utterance["command"] == record["alias"]: # check if the utterance matches a known command program alias. If this crashes, make sure the csv column headers match
                 record["utterances"].append(utterance["tagged"]) # add the utterance of the know command to the list                loud_notify("APPENDING UTT",utterance["utterance"])
                 # utterances.pop(i) # get rid of THAT SPECIFIC RECORD in utterances. Don't get rid of the command. I don't think I can use this, cause it throws off the enumerate
 
@@ -99,8 +99,8 @@ if __name__ == '__main__':
         selflib.verbose = True
         sys.stdout = stdout
     
-    # init() # load the entire cache into the parser.
-    load_config()
+    #init() # load the entire cache into the parser.
+    #load_config()
     train()
     
     if args.example is True:

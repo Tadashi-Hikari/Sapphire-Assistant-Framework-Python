@@ -16,20 +16,27 @@ def user_notify(message): # message string, not message like the protocol
     n.show()
 
 def call_database(flags): # is this too specific to sql? it could be an important distinction for de/serial purpose
-    COMMAND = os.getenv("ASST_COMMAND")
-    database = os.getenv("ASST_DATABASE")
-    
+    # the naming scheme needs to be formalized
+    COMMAND = os.getenv("ASST_COMMAND") 
+    database = os.getenv("ASST_DATABASE") # the location of the database module
+
+    # this is just a stop gap for now. Everything needs to be cleaned up
+    if COMMAND == None:
+        COMMAND = "python3"
+    if database == None:
+        database = "sqldatabase.py"
+        
     command = [COMMAND,database]
     for item in flags:
         command.append(item)
     notify(command)
     process = subprocess.run(command,stdout=subprocess.PIPE,stderr=subprocess.PIPE) # the returned value
-    if process.returncode is not 0:
+    if process.returncode is not 0: # this should return the serialized data
         notify("The following command returned a non-zero code: %s"%(command))
         notify("RETURN CODE: %d"%(process.returncode))
         notify("STDERR: %s"%(process.stderr))
     data = process.stdout
-    return data # it is returned, since selflib is part of the program, not called over command line why doesn't this return stdout?
+    return data # it is returned, since selflib is a part of the calling program, not called over command line.
 
 def call_application(flags): # this can be put into call_database, but I don't need it to call env variables again. is this bad?
     COMMAND = os.getenv("ASST_COMMAND")

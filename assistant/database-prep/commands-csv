@@ -1,0 +1,10 @@
+alias, base, command, flag, placement, prefix, converter, link
+calendar, khal, add, new, 1, None, None, None
+calendar, khal, datetime, None, 0, True, None, None
+calendar, khal, start, None, 0, True, None, None
+calendar, khal, end, None, 0, None, None, None
+calendar, khal, repeat, -r, 0, None, None, None
+calendar, khal, until, -u, 0, None, True, None
+calendar, khal, print, list, 0, None, None, None
+calendar, khal, event, None, 2, None, None, None
+calendar, khal, search, search, 0, None, None, None

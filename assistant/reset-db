@@ -1,0 +1,3 @@
+#!/bin/bash
+rm core.db
+./setup-database.sh

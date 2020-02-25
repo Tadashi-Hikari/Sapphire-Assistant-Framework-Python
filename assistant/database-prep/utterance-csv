@@ -1,0 +1,3 @@
+tagged,command
+wake me up at {datetime}, calendar
+I have {msg} at {datetime}, calendar

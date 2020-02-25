@@ -56,6 +56,8 @@ def train(): # I need to find a way to supress the output of this..
     utterances = utterances.strip()
     utterances = deserialize(utterances)
     notify(utterances) 
+
+    # to include the databse table expander, add in a function/loop here
     
     for record in records: # records is a list, record is a dict. records of commands
         record["utterances"] = []  # <- why am I clearing this here? If it's not cleared, then it doesn't make a new record, it just keeps referencing the same memory location. 

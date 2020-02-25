@@ -7,7 +7,7 @@ COMMAND = "python3" # this is just because every skill is python. Ideally, this 
 base = "./" # Well. This needs to be scrubbed... what should it be?
 stt = base+"sphinx-server.py"
 PARSER = base+"padatious-parser.py" # this conflicts w/ arg parser. be careful changing it
-version = "0.0.1"
+version = "0.1.0"
 database = base+"sqldatabase.py"
 formatter = base+"command-formatter.py"
 gui = base+"gui"
@@ -66,7 +66,7 @@ def post_office(message): # this is the primary routing service
             serial = serialize(message) # serializes with json
             command = [formatter,"-f",serial,"-v"]
             data = call_application(command) # call application can be found in selflib.py
-            #response = data.decode('utf-8') # I don't think I need this, since it's not over UDP
+            response = data.decode('utf-8')
             print(response)
         else:
             # if we somehow got here, without going through the command-formatter. Good for testing if you're working on the formatter

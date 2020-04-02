@@ -1,5 +1,7 @@
 from keras.models import Sequential
 from keras.layers import Dense, Activation
+import argparse, selflib, subprocess, sys, configparser
+from selflib import *
 
 # What is the purpose of this "Do one thing well?"
   # Train and parse utterances
@@ -68,7 +70,7 @@ def weight(sent): # I think this sets the weights for the network.
     for word in sent:
         total_weight += calc_weight(word)
     for word in sent: # This is two separate for loops, so that the total_weight is calculated before doing the rest of this
-        weight = 0 if word.startswith('{'} else calc_weight(word)
+        weight = 0 if word.startswith('{') else calc_weight(word)
         add([word], weight/total_weight) # each word is a portion of the total weight. larger words hold more weight I suppose
     
 # test intent. this is just a copy of the test
@@ -78,13 +80,37 @@ def setup():
     i_bye.train(self.data) # train the individual NN w/ the marked data
     # looks like I need an intent factory
 
+def load_from_database():
+    command = ["-t", command_table, "-l"]
+    print("calling database")
+    data = call_database(command)
+    records = deserialize(data)
+    
+    command = ["-t", training_utterances_table, "-l"]
+    data = call_database(command)
+    utterances = data.decode('utf-8')
+    utterances = utterances.strip()
+    utterances = deserialize(utterances)
+    notify(utterances) 
+    
+    for record in records:
+        record["utterances"] = []
+        for i,utterance in enumerate(utterances):
+            if utterance["command"] == record["alias"]:
+                record["utterances"].append(utterance["tagged"])
+
+        loud_notify("RECORD",record)
+        container.add_intent(record["command"], record["utterances"], True) # this needs to be changed for keras
+        # I need to replace this with an intent factory, that holds them all. A linked list should be fine. What about variability of sentence length
+    container.train() # this needs to be changed for keras
+
 # Keras save
-def save_model
+def save_model():
     filepath = "/dev/null"
     model.save(filepath)
     
 # Ah, this is how tests are written...
-def test_match):
+def test_match():
     assert i_bye.match(['bye']).conf > i_hi.match(['bye']) # trigger if the condition is false. test that it matches properly
     
 def match(sent): #slightly modified by me, to remove the object structure
@@ -96,9 +122,10 @@ def add_intent(vec):
     outputs.append([out])
 
 def deterimine_entity_boundaries():
+    print("Not yet implemented")
     # this is entity_edge.py
     # for now, maybe just remove the {}, replace them with :key: or some generic wildcard?
-    
+   
 class ids(StrEnum): # the purpose is to give a unique ID for tokens, from padatious. do I want this?
     unknown_tokens = ':0'
     w_1 = ':1'
@@ -153,7 +180,7 @@ def pollute():
         sent = sent[:]#this copies to protect the array
         for _ in range(int((len(sent) + 2) / 3)): #for a number of words, based on the length of the sentence plus 2, devided by 3 (probably so it is always >=1)
             sent.insert(p, ':null:')#insert pollution word, equal to null...)
-                        add(sent, self.LENIENCE) # give it the lenience score
+            add(sent, self.LENIENCE) # give it the lenience score
 
 def set_up_model():
     model = Sqeuential() # input layer is one-hot encoded, based on size of sentence, per intent.

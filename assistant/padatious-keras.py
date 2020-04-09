@@ -1,15 +1,12 @@
 from keras.models import Sequential
 from keras.layers import Dense, Activation
-import argparse, selflib, subprocess, sys, configparser
-from selflib import *
+import sys, re, pathlib
+#from selflib import *
 
-# What is the purpose of this "Do one thing well?"
-  # Train and parse utterances
+directory = "/home/chris/Lab/assistant/assistant/neural-networks/"
 
-# config comes during the setup
-def read_config():
+def load_config():
     print("read_config() not yet implemented")
-  
 # this is central to the program, so lets just put it up top
 def parse(vec): # this is more of a pipeline thing, than a simple act
     models =load_models()
@@ -21,42 +18,109 @@ def parse(vec): # this is more of a pipeline thing, than a simple act
     pick_highest_conf() #sorting algorithm
 
 # Keras load. taking it down the parse functions
-def load_model():
-    filepath = "null"
-    keras.models.load_model(filepath)
+# this was load model, but I have multiple. networks makes more sense
+def load_networks(filepath):
+    p = pathlib.Path(filepath)
+    for i, model in enumerate(p.iterdir()):
+        #if the file ends with .nn
+        if re.match(".nn$",model):
+            networks[i] = keras.models.load_model(filepath)
 
 def train_new_model():
     train()
 
-def train():
-    for sent in train_data.my_sents(name):
-        add(sent, 1.0) # add the sent, mark it as true, since its explicitly added to trigger the command
+def get_intents():
+    intents = []
+    
+    directory = "intents"
+    path = pathlib.path(directory)
+    for intent in path.interdir():
+        # I think there is a way to do this with purepath
+        if re.match("\.intent$", intent):
+            name = pathlib.pureposixpath(intent).name
+            intents.append(intent)
 
-        weight(sent) # weight is defined below
+    return intents()
+
+def load_sents(filename):
+    sents = []
+    
+    f = open(filename, 'r')
+    for line in f:
+        sents.append(line)
+
+    return sents
+
+# This is a clusterfuck, and maybe I should have left it as an object
+def adjust_for_entities():
+    without_entities = sent
+    for i, token in enumerate(without_entities):
+        if token.startswith('{'):
+            # if theres an entity, mark it with a null
+            without_entities[i] = ':null:'
+    if without_entities != sent:
+        return (without_entities, 0.0)
+    return None
+
+def train_models():
+    #get the number of commands/intents from the database
+
+    train_sents = [()]
+    good_match = 1.0
+    
+    intents = get_intents()
+
+    # a NN for each intent. EVERY INTENT, NOT EVERY SKILL gets an intent
+    for intent in intents():
+        sent = load_sents(intent)
+        #everything below may need to be indented... although this is where padatious runs multi-threads
+        train_sents.append((sent,good_match))
+        # Weight has to be wors, since weight checks fr entities and such
+        weight(sent) # weight is defined below. this is designed for an object... how can I attach it to a non, object?
+        train_sents.append(adjust_for_entity)
+
+        #Ah, I need to add in pollute
+        pollute() #pollute labes with maybe_match, whicg equals the lenience variable value
+
+        # I think other sents may be other entences from other intents, which would mean theres a lot more bad data than good. I suppose this 'famine' could strenthen the identifiers for the good. See simple_intent.py for more information
+        for sent in train_data.other_sents(self.name):
+
+        #do I need to add weights for this sent?
+        #what to do with the weights
+        #as long as input and output are kept togethe, their indexs will always match. I don't like this though. seems fragile
+        vec = vectorize(intent)
+        input.append(vec)
+        output.append(good_match)
+        # the function isn't built for this
+        input.append(adjust_for_entity())
+        bad_match = 0
+        output.append(bad_match)
         
-    for sent in train_data.my_sents(name):
-        without_entities = sent
-        for i, token in enumerate(without_entities):
-            if token.startswith('{'):
-                # if theres an entity, mark it with a null
-                without_entities[i] = ':null:'
-        if without_entities != sent:
-            add(without_entities, 0.0)
 
-    inputs, outputs = resolve_conflicts(inputs, outputs) # unsure what this does
+    # This is after that whole for loop
+    # inputs are the vectored sentences    
+    inputs, outputs = resolve_conflicts(inputs, outputs) # unsure what this does. I think it reates to duplicates. it makes more sense if other_sents are from other intents. it couls be for intents that have near/identical sentences
 
-    train_data = fann.training_data() # this line needs to be changed. I'm not using fann
-    train_data.set_train_data(inputs,outputs)
-
-
-    # this needs to be converted to keras
+    #train_data = fann.training_data() # this line needs to be changed. I'm not using fann
+    #train_data.set_train_data(inputs,outputs)
     for _ in range(10):
-        self.configure_net()
-        self.net.train_on_data(train_data, 1000, 0, 0)# fann specific. 1000 epocs
-        self.net.test_data(train_data)
-        if self.net.get_bit_fail() == 0: # It can stop training when there are no fail bits
+        model.fit(inputs, outputs, 0, 1000, 0, val=loss))
+        if callback is optimized:
             break
 
+    save_model(model, name)
+
+
+    # this needs to be converted to keras. it is trying them until there is decent convergence/optimized loss
+    for _ in range(10):
+        self.configure_net() # <- I think this is the "compile" in keras
+        self.net.train_on_data(train_data, 1000, 0, 0)# fann specific. 1000 epocs
+        # is he really testing o his training set? I thought this was bad practice
+        #self.net.test_data(train_data)
+        #if self.net.get_bit_fail() == 0: # It can stop training when there are no fail bits
+            #break
+
+# I actually don't think I need this function if I am not trating it as an object
 # add the vector and label
 def add(vec, out):
     inputs.append(vectorize(vec)) # what is happening here? add the vector but vectorized?
@@ -121,22 +185,18 @@ def add_intent(vec):
     inputs.append(vectorize(vec))
     outputs.append([out])
 
-def deterimine_entity_boundaries():
+def deterimine_entitky_boundaries():
     print("Not yet implemented")
     # this is entity_edge.py
     # for now, maybe just remove the {}, replace them with :key: or some generic wildcard?
-   
-class ids(StrEnum): # the purpose is to give a unique ID for tokens, from padatious. do I want this?
-    unknown_tokens = ':0'
-    w_1 = ':1'
-    w_2 = ':2'
-    w_3 = ':3'
-    w_4 = ':4'
 
-''' each token has an id, the id process goes throug the directory and returns the values?, excluding __* adn the value identifier. dir = list of names in current local scope. like a dict for objects. strings as keys. I think each value word is a key. dir = objects __dict__ attribute. object input is IdManager (self). init w/ no ids, unless passed ides.
-  -add_token = self.adj_token(token)? and if its not in the id, then it adds it to the id w/ the len of the id? id is dict, token is key, value = len of the id (len of the token string)
---adj_token makes a string a number. must mean adjust token
-- calls add_token for each token in an add_sent(sent) '''
+# this was an object. I want to convert it to a dictionary or liked list. is this prudent.
+ids = {}
+ids['unknown_tokens'] = ':0'
+ids['w_1'] = ':1'
+ids['w_2'] = ':2'
+ids['w_3'] = ':3'
+ids['w_4'] = ':4'
 
 def lines_hash():
     # the purpose of this is to see if an intent needs to be retrained
@@ -146,8 +206,7 @@ def get_intent():
     # load an intent file from a directory
     print("Work in progress")
 
-def get_entity():
-    # load the entities
+def get_entity():    # load the entities
     print("Work in progress")
     
 def get_end(sent):
@@ -197,36 +256,14 @@ def set_up_model():
     model.fit(train_features, train_labels, batch_size=128, epochs=20, verbose=0, callbacks=cb)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="All in one intent parser")
-    parser.add_argument('-p', dest='parse', help="enter a textual command (as if spoken)")
-
-    args = parser.parse_args()
     
     load_config()
-    load_networks() #load known NNs
+    load_networks(directory) #load known NNs
 
-    if args.parse is not None:
-        check_for_updates() # if there are any hash changes. this is actually handled in parse
+    train_models() # if there are any hash changes. this is actually handled in parse
         
-        user = args.parse
-        tokens = clean_and_tokenize(user)
-        vec = vectorize_features(tokens)
-        parse(vec)
-        match(vec) # this is where (in intents) padatious matches intents. It needs to get converted over to Keras
-
-    if args.train == True:
-        set_up_model()
-        for model in dir:
-            train_new_model()
-
-'''
-----NOTES-----
-
-# notes on the id class
-FROM THE CREATOR:  So, words are converted into indices like  apple -> 2 and orange -> 3
-
-Then, to generate an input vector, if a word in the sentence exists, it's index is set to 1.0. So, the sentence apple orange the vector could be 0 0 1 1. But, we want to add extra info like how many words are in the sentence. To do we map some random identifier like :num_words (the colon in front guarantees it won't collide with a real word someone has in their intent file) to an unused index like 4 and then our final vector might be apple orange -> 0 0 1 1 2. Instead of :num_words I just put :1, :2, :3...
-
-TL;DR, they are random string identifiers that have locations in the vector for extra sentence features.
-
-Oh, I forgot to specifically address that part. So, each w_1 through w_4 is a feature for the length of the sentence divided by 1 through 4. It's probably not useful honestly, but it's in case it helps train.'''
+    user = sys.argv[1:]
+    tokens = clean_and_tokenize(user)
+    vec = vectorize_features(tokens)
+    parse(vec)
+    match(vec) # this is where (in intents) padatious matches intents. It needs to get converted over to Keras

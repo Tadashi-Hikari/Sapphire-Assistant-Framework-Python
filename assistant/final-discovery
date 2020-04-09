@@ -1,0 +1,16 @@
+* intents_table
+** This would be the same data from intent files. any reason I shouldn't just parse files?
+* What is happning to the weights? Where is normization taking place?
+* what is the benefit of vectorizing individual words. what are their scores?
+** this is where the weights are added, I think. I wonder if this is a feature of fann... what happens to word conflicts? I guess this weighs words for each NN, as opposed to across the sepctrum. I mean, really this would be a different. but, conflicts doesnt skip, it just goes with the higher score. is conflict simply for weighted words?
+* weights
+** weights are only applied to individual words. OF course, if the word shows up more, it will have a higher weight. smart. but what about common words like 'the' or 'a'
+** I have been misjudging something. they're vecorizing individual tokens...
+* idea
+** this is a test
+*** 0 0 0 1, .25
+*** 0 0 1 0, .25
+*** 0 1 0 0, .25
+*** 1 0 0 0, .25
+** I am fairly certain this is whats happening
+*** why? this offers a way to test sentence importance off of single words. if theres a high value word, it can single handedly trigger the intent (a very domain specific word). something generic like a, the, or, wouls show a much larger ratio of fails when stand alone, weeding it out over time. ingenious

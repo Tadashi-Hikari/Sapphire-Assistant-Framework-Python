@@ -1,57 +1,289 @@
+# Key: search for quick ref
+#
+# global: definition of a global variable
+# pseudocode: needs to be implemented
+# verify: suspicious code. may not work. investigate further
+# next-steps: code that needs to be implemented, but wont hold up algorithm operation
+#
+# See relavent notes in the wiki
+
 from keras.models import Sequential
 from keras.layers import Dense, Activation
-import sys, re, pathlib
-#from selflib import *
+from keras import layers
+import tensorflow as tf
+import numpy as np
+import sys, re, pathlib, keras
+from pathlib import Path
 
-directory = "/home/chris/Lab/assistant/assistant/neural-networks/"
+# next-steps
+def deterimine_entity_boundaries():
+    print("Not yet implemented")
 
-def load_config():
-    print("read_config() not yet implemented")
-# this is central to the program, so lets just put it up top
-def parse(vec): # this is more of a pipeline thing, than a simple act
-    models =load_models()
-    #if new_models == true:
-    #  train_new_models()
-    for model in models:
-        start.thread(eval(model,vec))
-    wait_for_responses()
-    pick_highest_conf() #sorting algorithm
-
-# Keras load. taking it down the parse functions
-# this was load model, but I have multiple. networks makes more sense
-def load_networks(filepath):
-    p = pathlib.Path(filepath)
-    for i, model in enumerate(p.iterdir()):
-        #if the file ends with .nn
-        if re.match(".nn$",model):
-            networks[i] = keras.models.load_model(filepath)
-
-def train_new_model():
-    train()
-
-def get_intents():
-    intents = []
-    
-    directory = "intents"
-    path = pathlib.path(directory)
-    for intent in path.interdir():
-        # I think there is a way to do this with purepath
-        if re.match("\.intent$", intent):
-            name = pathlib.pureposixpath(intent).name
-            intents.append(intent)
-
-    return intents()
-
-def load_sents(filename):
+def get_sents(path_dir):
     sents = []
     
-    f = open(filename, 'r')
-    for line in f:
-        sents.append(line)
+    path = Path(path_dir)
+    for filename in path.iterdir():
+        f = open(filename,'r')
+        for line in f:
+            sents.append((line,filename.name))
 
+    # return a list of tuples
     return sents
+    
+# ------------------------------------
+home = "/home/chris/"
+network_dir = home+"Lab/assistant/assistant/neural-networks/"
+intent_dir = home+"Lab/assistant/assistant/intents"
 
-# This is a clusterfuck, and maybe I should have left it as an object
+# Global to all subfuncs. load sents from all intents.  a list of tuples
+ALL_SENTS = get_sents(intent_dir)
+LENIENCE = 0.6
+GOOD = 1.0
+
+# taken straight from padatious
+def tokenize(sentence):
+    """
+    Converts a single sentence into a list of individual significant units
+    Args:
+        sentence (str): Input string ie. 'This is a sentence.'
+    Returns:
+        list<str>: List of tokens ie. ['this', 'is', 'a', 'sentence']
+    """
+    tokens = []
+
+    class Vars:
+        start_pos = -1
+        last_type = 'o'
+
+    def update(c, i):
+        if c.isalpha() or c in '-{}':
+            t = 'a'
+        elif c.isdigit() or c == '#':
+            t = 'n'
+        elif c.isspace():
+            t = 's'
+        else:
+            t = 'o'
+
+        if t != Vars.last_type or t == 'o':
+            if Vars.start_pos >= 0:
+                token = sentence[Vars.start_pos:i].lower()
+                if token not in '.!?':
+                    tokens.append(token)
+            Vars.start_pos = -1 if t == 's' else i
+        Vars.last_type = t
+
+    for i, char in enumerate(sentence):
+        update(char, i)
+    update(' ', len(sentence))
+    return tokens
+
+# next-steps
+def check_for_changes():
+    return True
+
+def load_config():
+    print("Load configis not yet defined")
+
+def adj_token(token):
+    # only adjust if its a digit
+    if token.isdigit():
+        for i in range(10):
+            if str(i) in token:
+                token = token.replace(str(i), '#')
+                #if its the num 0-9, replace w/#
+    return token    
+
+#next-steps
+def save_ids(ids):
+    print("save_ids is not yet defined")
+
+# next-steps. allow for save and recall
+def generate_ids(allSents):
+    # generic id tokens? verify
+    ids = {}
+    ids['unknown_tokens'] = 0 #':0'
+    ids['w_1'] = 1 #':1'
+    ids['w_2'] = 2 #':2'
+    ids['w_3'] = 3 #':3'
+    ids['w_4'] = 4 #':4'
+
+    for sent,intent in allSents:
+        tokens = tokenize(sent)
+        for token in tokens:
+            token = adj_token(token)
+            if token not in ids:
+                ids[token] = len(ids) # the value of all ids is its length? This assigns it a unique id, that is the length of the ids at the current moment. If the id doesn't exist, it adds it to the end, gives it the ending number, then increments
+
+    #print all 
+    IDS = ids #'unknown_tokens' should be added, at index 0
+    return ids
+
+# IDS is implemented here, since python is dynamically typed. it is the id dictionary. this is just floating out here. verify
+def get_ids():
+    if check_for_changes() == True:
+        ids = generate_ids(ALL_SENTS)
+        # next-steps. allow for save
+        save_ids(ids)
+    else:
+        ids = load_ids()
+
+    return ids
+
+# Global
+IDS = get_ids()
+
+def load_models():
+    # there are no models to load
+    # if models exist:
+    models = gen_all_networks()
+    return models
+    
+# This will need to be threaded.
+def gen_all_networks():
+    intents = get_intents()
+
+    models = []
+    
+    for intent in intents:
+        models.append(gen_network(intent))
+    return models
+        
+def gen_network(intent):
+    # this is where train is getting called 
+    model = train(intent)
+    return model
+
+# this is done for each network
+def train(current):
+    # prep the training data
+    
+    input = []
+    output = []
+    train_data = [] # should be a list of tuples
+
+    # mark the good sents for this net
+    for sent,intent in ALL_SENTS:
+        sent = sent.strip()
+        # if it doesn't match, skip it
+        if (intent != current):
+            continue
+        train_data.append(add(sent, GOOD))
+        tup = ()
+        tup = weight(sent) # I don't know if weight is generating properly
+        for token,wt in tup:
+            train_data.append(add(token,wt)) # what is happening here? it is a vector with a single word, weighted. I believe it is used to determine the importance of that word. I think its conflicts are resolved later with resolve_conflicts, so that the network only trains on a word once, based on its  highest weight
+
+        # pollute the good data. returns tuple
+        tokens = tokenize(sent)
+        
+        # if a word doesn't start with : or is not :?
+        if not any(word[0] == ':' and word != ':' for word in tokens):
+            out = pollute(sent, 0)
+            for sent,label in out:
+                train_data.append(add(sent,label))
+            
+            out = pollute(sent, len(sent))
+            for sent,label in out:
+                train_data.append(add(sent,label))
+
+    # mark other intents as wrong for this net
+    for sent,tent in ALL_SENTS:
+        # if it matchs, skip it
+        if tent == intent:
+            continue  
+        train_data.append(add(sent, 0.0)) #how this work now? changed from sent[0]
+        #verify, I am starting suspect this only needs to be entered once? maybe not, if we're trying to really reinforce a fail on off sents
+        train_data.append(add(':null:', 0.0)) # I think this should only get pulled in if there is a sent that has variables
+        train_data.append(add("", 0.0)) # I think this is the None. Verify
+    # mark similar sents without entities as wrong.
+    for sent,tent in ALL_SENTS:
+        # if it doesn't match, skip it
+        if tent != intent:
+            continue
+        without_entities = sent
+        for i, token in enumerate(without_entities):
+            #if it starts with edge tag
+            if token.startswith('{'):
+                # replace that word with mull...
+                without_entities[i] = ':null:'
+        
+        if sent != without_entities:
+            train_data.append(add(without_entities, 0.0))
+
+    #train_data = resolve_conflicts(train_data)
+
+    # next-steps
+    i = 0
+    while i < 10:
+        # next-steps
+        model = build_model(train_data)
+        # train if convergence improves
+        # i++
+        i = 10
+
+    return model
+
+# verify, I think this should work
+def parse(input, models):    
+    # the input already comes in vectorized
+    input = np.array([input])
+    
+    for model in models:
+        predictions = model.predict(input)
+        print(predictions)
+        
+    
+
+# verify. I don't think this code is called  from anywhere
+def build_model(train_data):
+
+    train_features = []
+    train_labels = []
+    
+    for data,label in train_data:
+        # these are supposed to be vectors, but they're 
+        train_features.append(data)
+        train_labels.append(label)
+    
+    model = Sequential(
+        [
+            layers.Dense(len(IDS)),
+            layers.Dense(10),
+            layers.Dense(1),
+        ]
+    )
+    es = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', baseline=0.4)
+    # this is generic from the website
+    model.compile(loss='binary_crossentropy', optimizer='rmsprop')
+    # callback must be a list
+    cb = [es]
+
+    #adding numpy here. verify
+    train_features = np.array(train_features)
+    train_labels = np.array(train_labels)
+
+        # was batch size 128
+    model.fit(train_features, train_labels, batch_size=128, epochs=20, verbose=0, callbacks=cb)
+    return model
+
+# make a "maybe" sentence
+def pollute(sent, p):
+
+    polluted = []
+    
+    sent = tokenize(sent) #should turn it into a list right?
+    for _ in range(int((len(sent) + 2) / 3)): #oh, i don't think this will work. it looks like it's supposed to yeild, not return
+        sent.insert(p, ':null:')
+        # verify
+        newsent = ""
+        for token in sent:
+            newsent+=" "+token
+        polluted.append((newsent.strip(), LENIENCE))
+    return polluted
+
+# This is a clusterfuck, and maybe I should have left it as an object. verify
 def adjust_for_entities():
     without_entities = sent
     for i, token in enumerate(without_entities):
@@ -60,210 +292,148 @@ def adjust_for_entities():
             without_entities[i] = ':null:'
     if without_entities != sent:
         return (without_entities, 0.0)
-    return None
+    return None #verify
 
-def train_models():
-    #get the number of commands/intents from the database
-
-    train_sents = [()]
-    good_match = 1.0
-    
-    intents = get_intents()
-
-    # a NN for each intent. EVERY INTENT, NOT EVERY SKILL gets an intent
-    for intent in intents():
-        sent = load_sents(intent)
-        #everything below may need to be indented... although this is where padatious runs multi-threads
-        train_sents.append((sent,good_match))
-        # Weight has to be wors, since weight checks fr entities and such
-        weight(sent) # weight is defined below. this is designed for an object... how can I attach it to a non, object?
-        train_sents.append(adjust_for_entity)
-
-        #Ah, I need to add in pollute
-        pollute() #pollute labes with maybe_match, whicg equals the lenience variable value
-
-        # I think other sents may be other entences from other intents, which would mean theres a lot more bad data than good. I suppose this 'famine' could strenthen the identifiers for the good. See simple_intent.py for more information
-        for sent in train_data.other_sents(self.name):
-
-        #do I need to add weights for this sent?
-        #what to do with the weights
-        #as long as input and output are kept togethe, their indexs will always match. I don't like this though. seems fragile
-        vec = vectorize(intent)
-        input.append(vec)
-        output.append(good_match)
-        # the function isn't built for this
-        input.append(adjust_for_entity())
-        bad_match = 0
-        output.append(bad_match)
+# this finds the location in the vector and marks it as a val
+def assign(vector, key, val):
+    # I think vector is representing as a number value
+    vector[IDS[adj_token(key)]] = val # <-just set the index
+    return vector    
+    # vector[id[key]] = val. adj if key is a num. assign the value to the corresponding spot in the vector (bag of words)
         
-
-    # This is after that whole for loop
-    # inputs are the vectored sentences    
-    inputs, outputs = resolve_conflicts(inputs, outputs) # unsure what this does. I think it reates to duplicates. it makes more sense if other_sents are from other intents. it couls be for intents that have near/identical sentences
-
-    #train_data = fann.training_data() # this line needs to be changed. I'm not using fann
-    #train_data.set_train_data(inputs,outputs)
-    for _ in range(10):
-        model.fit(inputs, outputs, 0, 1000, 0, val=loss))
-        if callback is optimized:
-            break
-
-    save_model(model, name)
-
-
-    # this needs to be converted to keras. it is trying them until there is decent convergence/optimized loss
-    for _ in range(10):
-        self.configure_net() # <- I think this is the "compile" in keras
-        self.net.train_on_data(train_data, 1000, 0, 0)# fann specific. 1000 epocs
-        # is he really testing o his training set? I thought this was bad practice
-        #self.net.test_data(train_data)
-        #if self.net.get_bit_fail() == 0: # It can stop training when there are no fail bits
-            #break
-
-# I actually don't think I need this function if I am not trating it as an object
-# add the vector and label
-def add(vec, out):
-    inputs.append(vectorize(vec)) # what is happening here? add the vector but vectorized?
-    outputs.append([out]) #hmm. I thnk out is the label
-
-
-def weight(sent): # I think this sets the weights for the network.
-    def calc_weight(w): #length of the word, raised to the 3rd power... couldn't this just be a random weight?
-        return pow(len(w), 3.0)
-    total_weight = 0.0
-    for word in sent:
-        total_weight += calc_weight(word)
-    for word in sent: # This is two separate for loops, so that the total_weight is calculated before doing the rest of this
-        weight = 0 if word.startswith('{') else calc_weight(word)
-        add([word], weight/total_weight) # each word is a portion of the total weight. larger words hold more weight I suppose
-    
-# test intent. this is just a copy of the test
-def setup():
-    data.add_lines('bye', ['goodbye', 'bye', 'bye {person}', 'see you later'])
-    i_bye = intent('hi') # intent container
-    i_bye.train(self.data) # train the individual NN w/ the marked data
-    # looks like I need an intent factory
-
-def load_from_database():
-    command = ["-t", command_table, "-l"]
-    print("calling database")
-    data = call_database(command)
-    records = deserialize(data)
-    
-    command = ["-t", training_utterances_table, "-l"]
-    data = call_database(command)
-    utterances = data.decode('utf-8')
-    utterances = utterances.strip()
-    utterances = deserialize(utterances)
-    notify(utterances) 
-    
-    for record in records:
-        record["utterances"] = []
-        for i,utterance in enumerate(utterances):
-            if utterance["command"] == record["alias"]:
-                record["utterances"].append(utterance["tagged"])
-
-        loud_notify("RECORD",record)
-        container.add_intent(record["command"], record["utterances"], True) # this needs to be changed for keras
-        # I need to replace this with an intent factory, that holds them all. A linked list should be fine. What about variability of sentence length
-    container.train() # this needs to be changed for keras
-
-# Keras save
-def save_model():
-    filepath = "/dev/null"
-    model.save(filepath)
-    
-# Ah, this is how tests are written...
-def test_match():
-    assert i_bye.match(['bye']).conf > i_hi.match(['bye']) # trigger if the condition is false. test that it matches properly
-    
-def match(sent): #slightly modified by me, to remove the object structure
-    #return max(0, net.run(vectorize(sent))[0]) #this is the main part of matching intents that needs to be changed to keras
-    return predict(sent)
-
-def add_intent(vec):
-    inputs.append(vectorize(vec))
-    outputs.append([out])
-
-def deterimine_entitky_boundaries():
-    print("Not yet implemented")
-    # this is entity_edge.py
-    # for now, maybe just remove the {}, replace them with :key: or some generic wildcard?
-
-# this was an object. I want to convert it to a dictionary or liked list. is this prudent.
-ids = {}
-ids['unknown_tokens'] = ':0'
-ids['w_1'] = ':1'
-ids['w_2'] = ':2'
-ids['w_3'] = ':3'
-ids['w_4'] = ':4'
-
-def lines_hash():
-    # the purpose of this is to see if an intent needs to be retrained
-    print("work in progress")
-
-def get_intent():
-    # load an intent file from a directory
-    print("Work in progress")
-
-def get_entity():    # load the entities
-    print("Work in progress")
-    
-def get_end(sent):
-    return len(sent) if self.dir > 0 else -1 # what the fuck?
-    
-def vector(ids): # I think the # of ids are the num of id'd tokens. It would grow as num of new sentences with unique words are added
-    return [0.0] * len(ids) # return a list the size of the ids, as a float list
-
 def vectorize(sent): #vectorize a sentence
-    vector = vector(ids)
-    unknown = 0 # number of unknown tokens
-    # update token count int sent vector?
-    for token in sent:
-        if token in self.ids: #if the token is in the ids
-            ids.assign(vector, token, 1.0) # this is a class thing. I need to change this.
+    # verify. I think this should be referencing the dict. IDS
+    vector = [0.0] * len(IDS)
+    unknown = 0
+
+    tokens = tokenize(sent)
+    for token in tokens: #this is turning a string into chars
+        if token in IDS: #verify. I don't think something is working right here
+            vector = assign(vector, token, 1.0)
         else:
             unknown += 1
 
-    if len(sent) > 0: # assign the lengths, varied lengths, and unk token number as features to the vector. looks like its a bag of words model?
-        ids.assign(vector, ids.unkown, unknown/float(len(sent)))
-        ids.assign(vector, ids.w_1, len(sent)/1)
-        ids.assign(vector, ids.w_2, len(sent)/2)
-        ids.assign(vector, ids.w_3, len(sent)/3)
-        ids.assign(vector, ids.w_4, len(sent)/4)
+    # verify. 
+    if len(sent) > 0:
+        vector = assign(vector, "unknown_tokens", unknown/float(len(sent))) #verify. this works fine. straight from padatious
+        vector = assign(vector, "w_1", len(sent)/1)
+        vector = assign(vector, "w_2", len(sent)/2)
+        vector = assign(vector, "w_3", len(sent)/3)
+        vector = assign(vector, "w_4", len(sent)/4)
 
-#pollute is adding 
-def pollute():
-    #I believe p is _ defined as an input?
-    def pollute(sent, p):
-        sent = sent[:]#this copies to protect the array
-        for _ in range(int((len(sent) + 2) / 3)): #for a number of words, based on the length of the sentence plus 2, devided by 3 (probably so it is always >=1)
-            sent.insert(p, ':null:')#insert pollution word, equal to null...)
-            add(sent, self.LENIENCE) # give it the lenience score
+    return vector
+        
+# I dont plan in saving just yet. next-steps
+def save_model():
+    filepath = "/dev/null"
+    model.save(filepath) 
 
-def set_up_model():
-    model = Sqeuential() # input layer is one-hot encoded, based on size of sentence, per intent.
-    model.add(Dense(10)) # a hidden layer
-    model.add(output(1)) # an output layer
-    es = EarlyStopping(monitor='val_loss', mode='min', baseline=0.4) # Keras version. this incorporates the set_bit_fail_limit below
-    #net.set_bit_fail_limit(0.1) 
-    # I think I can replace this with a reasonably optimized loss
-    # this is generic from the website
-    model.compile(loss='binary_crossentropy', optimizer='rmsprop')
-    #this trains the model
-    cb = [es] #callbacks have to be a list
-    #model.fit(x_train, y_train, batch_size=128, epochs=20, verbose=0, callbacks=[])
-    model.fit(train_features, train_labels, batch_size=128, epochs=20, verbose=0, callbacks=cb)
+def add(vec, out):
+    inputs = vectorize(vec) # calling function vectorize
+    outputs = [out]
 
+    return (inputs,outputs)
+
+# the dir is a local namespace thing
+def get_end(sent):
+    return len(sent) if self.dir > 0 else -1 # what the fuck?
+
+# next-steps
+def load_config():
+    print("read_config() not yet implemented")
+    
+# I think this way of defining weights preflattens the network
+def weight(sent): # I dont see how this is impacting the network. verify
+    tokens = tokenize(sent)
+    
+    temp_train_data = []
+    def calc_weight(w):
+        return pow(len(w), 3.0)
+    total_weight = 0.0
+    for token in tokens:
+        total_weight += calc_weight(token)
+    for token in tokens:
+        weight = 0 if token.startswith('{') else calc_weight(token)
+        # return wont work, since it outputs multiple. does this need to be a yeild?
+        
+        temp_train_data.append((token, weight/total_weight))
+    return temp_train_data
+
+def load_networks(filepath):
+    p = pathlib.Path(filepath)
+    for i, model in enumerate(p.iterdir()):
+        #if the file ends with .nn
+        if re.match(".nn$",model):
+            networks[i] = keras.models.load_model(filepath)
+
+# This scrapes the intent directory
+def get_intents():
+    intents = []
+    
+    path = pathlib.Path(intent_dir)
+    for intent in path.iterdir():
+        # I think there is a way to do this with purepath
+        name = pathlib.PurePosixPath(intent).name
+        if "~" not in name:
+            intents.append(name)
+
+    return intents
+
+# taken straight from padatious
+def resolve_conflicts(train_data):
+    """
+    Checks for duplicate sents and if there are any,
+    remove one and set the output to the max of the two labels
+    Args:
+        inputs (list<list<float>>): Array of input vectors
+        outputs (list<list<float>>): Array of output vectors
+    Returns:
+        tuple<inputs, outputs>: The modified inputs and outputs
+    """
+    inputs = []
+    outputs = []
+
+    # whats this doing? see above
+    for ins,outs in train_data:
+        inputs.append(ins)
+        outputs.append(outs)
+    
+    data = {}
+    for inp, out in zip(inputs, outputs):
+        tup = tuple(inp)
+        if tup in data:
+            data[tup].append(out)
+        else:
+            data[tup] = [out]
+
+    inputs, outputs = [], []
+    for inp, outs in data.items():
+        inputs.append(list(inp))
+        combined = [0] * len(outs[0])
+        for i in range(len(combined)):
+            combined[i] = max(j[i] for j in outs)
+        outputs.append(combined)
+
+    temp_train = ()
+    for inp, out in zip(inputs, outputs):
+        temp_train.append(inp,out)
+    
+    return temp_train
+
+# ------------------------------------
 if __name__ == '__main__':
     
     load_config()
-    load_networks(directory) #load known NNs
+    load_networks(network_dir) #load known NNs
 
-    train_models() # if there are any hash changes. this is actually handled in parse
-        
+    # pseudocode
+    models = gen_all_networks() # if there are any hash changes. this is actually handled in parse
+
+    # take all command line arguments
     user = sys.argv[1:]
-    tokens = clean_and_tokenize(user)
-    vec = vectorize_features(tokens)
-    parse(vec)
-    match(vec) # this is where (in intents) padatious matches intents. It needs to get converted over to Keras
+    # next-steps
+    #tokens = clean_and_tokenize(user)
+    sent = user[0]
+    vec = vectorize(sent)
+    parse(vec, models) # this is where I inntend to runn the NN itself.
+    # match(vec) # this is where (in intents) padatious matches intent

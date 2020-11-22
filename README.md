@@ -1,4 +1,4 @@
-# Assistant
+# Python based *NIX Assistant
 
 ## About
 

@@ -1,0 +1,9 @@
+* Overall
+** Core
+Core coordinates everything that is installed. (How?). It acts as the daemon and parent process to manage everything that needs to be managed w/in the assitant
+
+** udp-client
+This allows commands to be sent from the command line (or elsewhere) rather than through audio
+
+** caldav
+This retrieves and keeps the assistants schedule online, so it can be accessed from anywhere

@@ -1,0 +1,1 @@
+# How does it know which applications to start up?

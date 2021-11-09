@@ -5,7 +5,7 @@ from selflib import *
 # These values are set in load_config, from the values in selflib.py. just here for global reference. Maybe move to main?
 COMMAND = "python3" # this is just because every skill is python. Ideally, this wont need to preface every command. Maybe just use a shebang?
 base = "./" # Well. This needs to be scrubbed... what should it be?
-stt = base+"sphinx-server.py"
+stt = base+"vosk-server.py"
 PARSER = base+"padatious-parser.py" # this conflicts w/ arg parser. be careful changing it
 version = "0.1.0"
 database = base+"sqldatabase.py"

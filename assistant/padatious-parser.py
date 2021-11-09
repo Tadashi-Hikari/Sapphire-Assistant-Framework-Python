@@ -7,7 +7,7 @@ container = IntentContainer('intent_cache') # this is where the trained NN stuff
 # change stdout since padatious is noisy. This can be changed w/ verbose
 stdout = sys.stdout # keep a local copy
 sys.stdout = None
-#CONFIG = 
+#CONFIG = "none"
 command_table = "commands"
 training_utterances_table = "utterances"
 
@@ -15,7 +15,7 @@ training_utterances_table = "utterances"
 
 def load_config(): # this is not enabled yet
     config = configparser.ConfigParser() 
-    config.read(CONFIG) # this needs to be implemented with a try/catch
+    #config.read(CONFIG) # this needs to be implemented with a try/catch
 
     command_table = "commands"
     trianing_utterances_table = "utterances"

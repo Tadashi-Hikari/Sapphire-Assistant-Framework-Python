@@ -1,0 +1,2 @@
+# This will just take ANY file that has been made in the journal folder, scrap the title, sort it appropriately.
+# This lets me focus on making the journal outright rather than formatting the title and such

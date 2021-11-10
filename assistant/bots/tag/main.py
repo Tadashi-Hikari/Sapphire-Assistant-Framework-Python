@@ -116,14 +116,15 @@ def backlink_link(path,backlink_file):
         print("Creating backlink directory")
         os.mkdir(directory_start+backlink_directory)
     file = open(backlink_path,'w')
+    link_path = "[[" + path + "]]"
     for line in backlink_file:
         # Every line should be EXACTLY the path to a file that links to it (should it incorporate WHERE it's linked? like a subheader # does in HTML)
-        if(line == path):
+        if(line == link_path):
             print("This backlink exists already")
             file.close()
             return
-        print("Adding a new backlink")
-    file.write(path)
+    print("Adding a new backlink")
+    file.write(link_path)
     file.close()
 
 if __name__ == '__main__':

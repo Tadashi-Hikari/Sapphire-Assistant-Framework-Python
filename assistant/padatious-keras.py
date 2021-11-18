@@ -5,7 +5,7 @@
 # verify: suspicious code. may not work. investigate further
 # next-steps: code that needs to be implemented, but wont hold up algorithm operation
 #
-# See relavent notes in the wiki
+# See relavent notes in the spellbook
 
 from keras.models import Sequential
 from keras.layers import Dense, Activation

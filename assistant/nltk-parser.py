@@ -24,27 +24,23 @@ def train():
 
             # This is a list of feature lists and their corresponding label
             featuresets.append((features,intent))
-            #print(features,intent)
 
     # train and return using those features, from the alarm & weather skills
-    print(featuresets)
     return nltk.classify.NaiveBayesClassifier.train(featuresets)
 
 if __name__ == "__main__":
     # read the data from stdin
     data = " ".join(sys.argv[1:])
-    print("Received:",data)
+    #print("Received:",data)
     # The words that are relevant to whatever. From EVERYTHING
     word_feature = ["alarm", "set", "weather", "outside"]
     tokens = word_tokenize(data)
     token_set = set(tokens)
 
     features = {}
-    # This is a 'docment' level classificaiton. Checking if/what words occur in a string/document
+    # This is a 'document' level classification. Checking if/what words occur in a string/document
     for word in word_feature:
         features['contains({})'.format(word)] = (word in tokens)
-
-    #print(features)
 
     classifier = train()
     print(classifier.classify(features))

@@ -3,6 +3,9 @@ from selflib import *
 
 ''' I am running into an issue here where the parser is slecting an action, but doesn't specify what command it is for '''
 
+'''This is for slotting things in padatious, where they need to go. I need to look at this
+ closer and see if I can use it for Athenas intent parser, maybe to format better for skills'''
+
 def format_for_commandline(message):
     msg = deserialize(message)
     payload = msg['payload'] # get the payload, which is currently a padatious response

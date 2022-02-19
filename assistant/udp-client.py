@@ -1,3 +1,5 @@
+# This just takes stdin an sends it as a UDP over the proper port.
+
 import socket, sys, json, argparse
 
 HOST, PORT = "localhost", 9999
@@ -24,7 +26,5 @@ msg = json.dumps(message)
 # As you can see, there is no connect() call; UDP has no connections.
 # Instead, data is directly sent to the recipient via sendto(),
 sock.sendto(bytes(msg+"\n", "utf-8"), (HOST, PORT))
-#received = str(sock.recv(1024), "utf-8")
 
 print("Sent: {}".format(data))
-#print("Received: {}".format(received))

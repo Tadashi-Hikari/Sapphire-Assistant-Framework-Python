@@ -7,7 +7,7 @@ def train():
     # intents should be a list of paths
     spirit = SimpleSpirit()
     intents = spirit.search_directory(directory="./skills/")
-
+    
     featuresets = []
     for intent in intents:
         file = open(intent,'r')

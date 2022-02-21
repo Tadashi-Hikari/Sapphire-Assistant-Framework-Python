@@ -136,7 +136,7 @@ def list_table(): # This sends a list of KVP, for deserialize
     loud_notify("RECORD LIST", record_list)
     serialized = serialize(record_list)
     if args.write is not True:
-        print(serialized) # <- this is for use in core.py
+        print(serialized) # <- this is for use in depreciated-core.py
     return serialized # <- this is for internal sqldatabase useage (and selflib)
 
 def list_all_tables():

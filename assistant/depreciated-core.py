@@ -151,7 +151,7 @@ def start_stt(): # You should be a separate process that sends things over the n
     subprocess.run(command, stdout=pipefile) # this is a special case, as a daemon its always talking to core.
     # This should be printing it's STDOUT to the server handler
     
-def start_applications(): # run at the start of core.py
+def start_applications(): # run at the start of depreciated-core.py
     notify("Starting applications")
     # start_ui() # start the user iterface
     # notify("Started UI")

@@ -1,13 +1,15 @@
 import os
 
-# Summon a simple spirit to recursively find files with certain extensions
-class SimpleSpirit:
-
+# a simple spell to recursively find files with certain extensions
+class Accio:
     def __init__(self):
         self.ignored = ""
         self.file_ending = ".intent"
 
     data = []
+
+    def set_objective(self,objective):
+        self.file_ending = objective
 
     # This is designed to be called recursively, to walk a directory looking for valid files
     def search_directory(self,directory):

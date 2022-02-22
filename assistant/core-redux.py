@@ -33,10 +33,12 @@ def run_start_services():
     print("Nothing")
     file = open("start.conf",'r')
     for line in file:
-        shell_out(line)
+        spwan_process(line)
 
-def shell_out(program):  # Drop to the editor, for editing core scripts
-    process = subprocess.Popen(["python3",program,"-s"],stdout=subprocess.PIPE)
+## Runs in its own process, no longer controlled by core
+def spwan_process(program):
+    command = ["python3"].append(program)
+    process = subprocess.Popen(command,stdin=subprocess.PIPE,stdout=subprocess.PIPE)
     print(process.pid)
 
 def wrap_process(process):
@@ -58,10 +60,9 @@ if __name__ == '__main__':
 
     # This is demo code
     if(args.test == True):
-        shell_out("core-redux.py")
+        print("No test to run")
     elif(args.server == True):
-        start_server()
-        # subprocess.run(["python3","core-redux.py","-s"])
+        spwan_process(["core-redux.py","-t"])
     else:
         wrap_process("nltk-parser.py")
 

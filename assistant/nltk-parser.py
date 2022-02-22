@@ -1,11 +1,11 @@
 import sys, nltk
 from nltk import word_tokenize
-from library.spells import SimpleSpirit
+from library.spells import Accio
 
 def train():
     # this applies when I am searching for the skill directories
     # intents should be a list of paths
-    spirit = SimpleSpirit()
+    spirit = Accio()
     intents = spirit.search_directory(directory="./skills/")
     
     featuresets = []
